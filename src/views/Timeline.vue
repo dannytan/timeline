@@ -18,57 +18,51 @@
       class="add-event-dialog"
       title="Add Event To Timeline"
       :visible.sync="showAddEventDialog"
-      width="40%"
-      center>
-      <el-row class="dialog-row">
-        <el-col :span="24">
-          <div class="input-label">Title</div>
-          <el-input
-            v-model="newEvent.title"
-            clearable>
-          </el-input>
-        </el-col>
-      </el-row>
-      <el-row class="dialog-row">
-        <el-col :span="12" class="column-left">
-          <div class="input-label">Date</div>
-          <el-date-picker
-            class="full-width"
-            v-model="newEvent.date"
-            type="date"
-            placeholder="MM/DD/YYY"
-            format="MM/dd/yyyy"
-            value-format="MM-dd-yyyy">
-          </el-date-picker>
-        </el-col>
-        <el-col :span="12" class="column-right">
-          <div class="input-label">Rating (1-10)</div>
-          <el-input-number
-            class="full-width"
-            v-model="newEvent.rating"
-            controls-position="right"
-            :min="1"
-            :max="10">
-          </el-input-number>
-        </el-col>
-      </el-row>
-      <el-row>
-        <el-col :span="24">
-          <div class="input-label">Description (Optional)</div>
+      width="40%">
+      <el-form :model="eventForm" :rules="rules" ref="eventForm"
+               label-position="top">
+        <el-form-item label="Title" prop="title">
+          <el-input v-model="eventForm.title" clearable></el-input>
+        </el-form-item>
+        <el-row>
+          <el-col :span="12"><el-form-item label="Date" required>
+            <el-form-item prop="date">
+              <el-date-picker
+                v-model="eventForm.date"
+                type="date"
+                placeholder="MM/DD/YYY"
+                format="MM/dd/yyyy"
+                value-format="MM-dd-yyyy">
+              </el-date-picker>
+            </el-form-item>
+          </el-form-item>
+          </el-col>
+          <el-col :span="12">
+            <el-form-item label="Rating" prop="rating">
+              <el-input-number
+                v-model="eventForm.rating"
+                controls-position="right"
+                :min="1"
+                :max="10">
+              </el-input-number>
+            </el-form-item>
+          </el-col>
+        </el-row>
+        <el-form-item label="Description" prop="description">
           <el-input
             type="textarea"
             :autosize="{ minRows: 2, maxRows: 4}"
-            v-model="newEvent.description">
+            v-model="eventForm.description">
           </el-input>
-        </el-col>
-      </el-row>
+        </el-form-item>
+      </el-form>
       <span slot="footer">
-    <el-button @click="closeAddEventDialog">Cancel</el-button>
-    <el-button
-      type="primary"
-      icon="el-icon-plus"
-      @click="addEvent">Add</el-button>
-  </span>
+       <el-button type="primary"
+                  icon="el-icon-plus"
+                  @click="submitForm()">Add</el-button>
+          <el-button @click="resetForm()">Reset</el-button>
+          <el-button @click="closeAddEventDialog">Cancel</el-button>
+      </span>
     </el-dialog>
   </div>
 </template>
@@ -124,7 +118,7 @@ export default {
         colors: ['#ba334f'],
         grid: {
           row: {
-            colors: ['#f3f3f3', 'transparent'], // takes an array which will be repeated on columns
+            colors: ['#f3f3f3', 'transparent'],
             opacity: 0.5,
           },
         },
@@ -142,12 +136,6 @@ export default {
   data() {
     return {
       showAddEventDialog: false,
-      newEvent: {
-        title: '',
-        date: '',
-        rating: null,
-        description: '',
-      },
       events: [{
         title: 'Test Event',
         date: '11-20-2017',
@@ -164,6 +152,24 @@ export default {
         rating: 6,
         description: 'This is another test description.',
       }],
+      eventForm: {
+        title: '',
+        date: '',
+        rating: null,
+        description: '',
+      },
+      rules: {
+        title: [
+          { required: true, message: 'Please input an event title.', trigger: 'blur' },
+          { max: 50, message: 'Character limit is 50', trigger: 'blur' },
+        ],
+        date: [
+          { required: true, message: 'Please pick a date', trigger: 'change' },
+        ],
+        rating: [
+          { required: true, message: 'Please choose a rating', trigger: 'change' },
+        ],
+      },
     };
   },
   methods: {
@@ -172,19 +178,23 @@ export default {
     },
     closeAddEventDialog() {
       this.showAddEventDialog = false;
-      this.clearNewEvent();
+      this.resetForm();
     },
-    addEvent() {
-      this.events.push(this.newEvent);
-      this.closeAddEventDialog();
+    submitForm() {
+      // eslint-disable-next-line consistent-return
+      this.$refs.eventForm.validate((valid) => {
+        if (valid) {
+          const newEvent = Object.assign({}, this.eventForm);
+          this.events.push(newEvent);
+          this.closeAddEventDialog();
+        } else {
+          console.log('Error on submit!');
+          return false;
+        }
+      });
     },
-    clearNewEvent() {
-      this.newEvent = {
-        title: '',
-        date: '',
-        rating: null,
-        description: '',
-      };
+    resetForm() {
+      this.$refs.eventForm.resetFields();
     },
   },
 };
@@ -203,20 +213,10 @@ export default {
   }
 
   .add-event-dialog {
-    .input-label {
-      font-weight: bold;
-      margin-bottom: 5px;
-    }
-    .dialog-row {
-      margin-bottom: 20px;
-      .column-left {
-        padding-right: 10px;
-      }
-      .column-right {
-        padding-left: 10px;
-      }
-      .full-width {
-        width: 100%;
+    .el-form {
+      /deep/ .el-form-item__label {
+        font-weight: bold;
+        padding: 0;
       }
     }
   }

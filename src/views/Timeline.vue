@@ -7,19 +7,33 @@
 <script>
 import VueApexCharts from 'vue-apexcharts';
 
+// TODO - Change to show data points at all times, not just on hover
 export default {
   name: 'Timeline',
   components: {
     apexchart: VueApexCharts,
   },
-  data() {
-    return {
-      series: [{
-        name: 'Desktops',
-        data: [1, 5, 3, 2, 8, 4, 9, 7, 5],
-      }],
-      chartOptions: {
+  computed: {
+    series() {
+      const ratings = [];
+      this.events.forEach((event) => {
+        ratings.push(event.rating);
+      });
+
+      return [{
+        name: 'Rating',
+        data: ratings,
+      }];
+    },
+    chartOptions() {
+      const dates = [];
+      this.events.forEach((event) => {
+        dates.push(event.date);
+      });
+
+      return {
         chart: {
+          type: 'line',
           zoom: {
             enabled: false,
           },
@@ -30,6 +44,7 @@ export default {
         stroke: {
           curve: 'straight',
         },
+        colors: ['#ba334f'],
         title: {
           text: 'My Timeline',
           align: 'center',
@@ -40,10 +55,30 @@ export default {
             opacity: 0.5,
           },
         },
+        labels: dates,
         xaxis: {
-          categories: ['1995', '2001', '2003', '2007', '2011', '2014', '2017', '2018', '2019'],
+          type: 'datetime',
         },
-      },
+        yaxis: {
+          min: 0,
+          max: 10,
+        },
+      };
+    },
+  },
+  data() {
+    return {
+      events: [{
+        title: 'Test Event',
+        date: '11-20-2019',
+        rating: 9,
+        description: 'This is a test description.',
+      }, {
+        title: 'Test Event 2',
+        date: '11-28-2019',
+        rating: 3,
+        description: 'This is another test description.',
+      }],
     };
   },
 };

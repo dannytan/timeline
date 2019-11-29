@@ -76,9 +76,13 @@ export default {
     apexchart: VueApexCharts,
   },
   computed: {
+    orderedEvents() {
+      const orderedEvents = this.events;
+      return orderedEvents.sort(this.compareEvents);
+    },
     series() {
       const ratings = [];
-      this.events.forEach((event) => {
+      this.orderedEvents.forEach((event) => {
         ratings.push(event.rating);
       });
 
@@ -89,7 +93,7 @@ export default {
     },
     chartOptions() {
       const dates = [];
-      this.events.forEach((event) => {
+      this.orderedEvents.forEach((event) => {
         dates.push(event.date);
       });
 
@@ -101,6 +105,11 @@ export default {
           },
           toolbar: {
             show: false,
+          },
+          events: {
+            markerClick: (a, b, marker) => {
+              console.log('Data Index', marker.dataPointIndex);
+            },
           },
         },
         dataLabels: {
@@ -141,16 +150,6 @@ export default {
         date: '11-20-2017',
         rating: 9,
         description: 'This is a test description.',
-      }, {
-        title: 'Test Event 2',
-        date: '11-28-2018',
-        rating: 3,
-        description: 'This is another test description.',
-      }, {
-        title: 'Test Event 2',
-        date: '11-30-2019',
-        rating: 6,
-        description: 'This is another test description.',
       }],
       eventForm: {
         title: '',
@@ -195,6 +194,18 @@ export default {
     },
     resetForm() {
       this.$refs.eventForm.resetFields();
+    },
+    compareEvents(a, b) {
+      const dateA = new Date(a.date);
+      const dateB = new Date(b.date);
+
+      let comparison = 0;
+      if (dateA.getTime() > dateB.getTime()) {
+        comparison = 1;
+      } else if (dateA.getTime() < dateB.getTime()) {
+        comparison = -1;
+      }
+      return comparison;
     },
   },
 };

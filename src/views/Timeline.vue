@@ -5,15 +5,32 @@
         <div class="chart-title">Spiritual Timeline</div>
       </el-col>
       <el-col :span="12">
-        <el-button
-          type="primary"
-          icon="el-icon-plus"
-          class="add-event-btn"
-          size="medium"
-          @click="openAddEventDialog">Add Event</el-button>
+        <div class="event-action-btn-container">
+          <el-button
+            type="primary"
+            icon="el-icon-plus"
+            class="event-action-btn"
+            size="medium"
+            @click="openAddEventDialog">Add Event</el-button>
+          <el-button
+            type="primary"
+            plain
+            icon="el-icon-edit"
+            class="event-action-btn"
+            size="medium"
+            @click="openEditEventsDialog">Edit Events</el-button>
+        </div>
       </el-col>
     </el-row>
-    <apexchart height=350 :options="chartOptions" :series="series" />
+    <apexchart height=500 :options="chartOptions" :series="series" />
+    <el-row>
+      <el-col :span="8" :offset="8" style="text-align: center">
+        <h2 style="color: #ba334f">{{selectedEvent.title}}</h2>
+        <h4>{{selectedEvent.date}}</h4>
+        <el-tag v-show="selectedEvent.rating">Rating: {{selectedEvent.rating}}</el-tag>
+        <p>{{selectedEvent.description}}</p>
+      </el-col>
+    </el-row>
     <el-dialog
       class="add-event-dialog"
       title="Add Event To Timeline"
@@ -64,6 +81,46 @@
           <el-button @click="closeAddEventDialog">Cancel</el-button>
       </span>
     </el-dialog>
+    <el-dialog
+      class="edit-events-dialog"
+      title="Edit Timeline Events"
+      :visible.sync="showEditEventsDialog">
+      <el-timeline>
+        <el-timeline-item
+          v-for="(event, index) in orderedEvents"
+          :key="index"
+          type="primary"
+          :timestamp="event.date"
+          placement="top">
+          <el-card class="timeline-card">
+            <div>
+              <div class="timeline-card-title">{{event.title}}</div>
+              <el-tag class="timeline-card-rating" size="small">Rating: {{event.rating}}</el-tag>
+              <div class="timeline-card-actions">
+                <el-button
+                  type="text"
+                  icon="el-icon-edit-outline"
+                  class="timeline-card-action-btn"
+                  @click="editEvent(index)">
+                </el-button>
+                <el-button
+                  type="text"
+                  icon="el-icon-delete"
+                  class="timeline-card-action-btn"
+                  @click="deleteEvent(index)">
+                </el-button>
+              </div>
+            </div>
+            <p>{{event.description}}</p>
+          </el-card>
+        </el-timeline-item>
+      </el-timeline>
+      <span slot="footer">
+       <el-button type="primary"
+                  @click="showEditEventsDialog = false">Done</el-button>
+          <el-button @click="showEditEventsDialog = false">Cancel</el-button>
+      </span>
+    </el-dialog>
   </div>
 </template>
 
@@ -108,7 +165,7 @@ export default {
           },
           events: {
             markerClick: (a, b, marker) => {
-              console.log('Data Index', marker.dataPointIndex);
+              this.setSelectedEvent(marker.dataPointIndex);
             },
           },
         },
@@ -145,6 +202,8 @@ export default {
   data() {
     return {
       showAddEventDialog: false,
+      showEditEventsDialog: false,
+      selectedEvent: {},
       events: [{
         title: 'Test Event',
         date: '11-20-2017',
@@ -172,6 +231,9 @@ export default {
     };
   },
   methods: {
+    setSelectedEvent(eventIndex) {
+      this.selectedEvent = this.orderedEvents[eventIndex];
+    },
     openAddEventDialog() {
       this.showAddEventDialog = true;
     },
@@ -207,20 +269,32 @@ export default {
       }
       return comparison;
     },
+    openEditEventsDialog() {
+      this.showEditEventsDialog = true;
+    },
+    editEvent(index) {
+      console.log(index);
+    },
+    deleteEvent(index) {
+      this.events.splice(index, 1);
+    },
   },
 };
 </script>
 
 <style scoped lang="scss">
   .chart-title {
-    color: #873031;
+    color: #ba334f;
     font-size: 26px;
     font-weight: bold;
     padding: 5px 25px;
   }
 
-  .add-event-btn {
+  .event-action-btn-container {
     float: right;
+    .event-action-btn {
+      display: inline-flex;
+    }
   }
 
   .add-event-dialog {
@@ -228,6 +302,36 @@ export default {
       /deep/ .el-form-item__label {
         font-weight: bold;
         padding: 0;
+      }
+    }
+  }
+
+  .edit-events-dialog {
+    .timeline-card {
+      /deep/ .el-card__body {
+        padding: 20px 20px 10px 20px;
+      }
+
+      .timeline-card-title {
+        display: inline-flex;
+        font-weight: bold;
+        font-size: 16px;
+      }
+
+      .timeline-card-rating {
+        display: inline-flex;
+        margin-left: 10px;
+      }
+
+      .timeline-card-actions {
+        float: right;
+      }
+
+      .timeline-card-action-btn {
+        display: inline-flex;
+        padding-top: 2px;
+        margin-left: 4px;
+        font-size: 18px;
       }
     }
   }

@@ -11,14 +11,14 @@
             icon="el-icon-plus"
             class="event-action-btn"
             size="medium"
-            @click="openAddEventDialog">Add Event</el-button>
+            @click="openAddEventModal">Add Event</el-button>
           <el-button
             type="primary"
             plain
             icon="el-icon-edit"
             class="event-action-btn"
             size="medium"
-            @click="openEditEventsDialog">Edit Events</el-button>
+            @click="openEditTimelineDialog">Edit Events</el-button>
         </div>
       </el-col>
     </el-row>
@@ -31,60 +31,14 @@
         <p>{{selectedEvent.description}}</p>
       </el-col>
     </el-row>
-    <el-dialog
-      class="add-event-dialog"
-      title="Add Event To Timeline"
-      :visible.sync="showAddEventDialog"
-      width="40%">
-      <el-form :model="eventForm" :rules="rules" ref="eventForm"
-               label-position="top">
-        <el-form-item label="Title" prop="title">
-          <el-input v-model="eventForm.title" clearable></el-input>
-        </el-form-item>
-        <el-row>
-          <el-col :span="12"><el-form-item label="Date" required>
-            <el-form-item prop="date">
-              <el-date-picker
-                v-model="eventForm.date"
-                type="date"
-                placeholder="MM/DD/YYY"
-                format="MM/dd/yyyy"
-                value-format="MM-dd-yyyy">
-              </el-date-picker>
-            </el-form-item>
-          </el-form-item>
-          </el-col>
-          <el-col :span="12">
-            <el-form-item label="Rating" prop="rating">
-              <el-input-number
-                v-model="eventForm.rating"
-                controls-position="right"
-                :min="1"
-                :max="10">
-              </el-input-number>
-            </el-form-item>
-          </el-col>
-        </el-row>
-        <el-form-item label="Description" prop="description">
-          <el-input
-            type="textarea"
-            :autosize="{ minRows: 2, maxRows: 4}"
-            v-model="eventForm.description">
-          </el-input>
-        </el-form-item>
-      </el-form>
-      <span slot="footer">
-       <el-button type="primary"
-                  icon="el-icon-plus"
-                  @click="submitForm()">Add</el-button>
-          <el-button @click="resetForm()">Reset</el-button>
-          <el-button @click="closeAddEventDialog">Cancel</el-button>
-      </span>
-    </el-dialog>
+    <EventModal
+      :show-modal="showAddEventModal"
+      @submitted="addEvent"
+      @closed="closeAddEventModal"></EventModal>
     <el-dialog
       class="edit-events-dialog"
       title="Edit Timeline Events"
-      :visible.sync="showEditEventsDialog">
+      :visible.sync="showEditTimelineDialog">
       <el-timeline>
         <el-timeline-item
           v-for="(event, index) in orderedEvents"
@@ -117,8 +71,8 @@
       </el-timeline>
       <span slot="footer">
        <el-button type="primary"
-                  @click="showEditEventsDialog = false">Done</el-button>
-          <el-button @click="showEditEventsDialog = false">Cancel</el-button>
+                  @click="showEditTimelineDialog = false">Done</el-button>
+          <el-button @click="showEditTimelineDialog = false">Cancel</el-button>
       </span>
     </el-dialog>
   </div>
@@ -126,11 +80,13 @@
 
 <script>
 import VueApexCharts from 'vue-apexcharts';
+import EventModal from '../components/EventModal.vue';
 
 export default {
   name: 'Timeline',
   components: {
     apexchart: VueApexCharts,
+    EventModal,
   },
   computed: {
     orderedEvents() {
@@ -201,8 +157,8 @@ export default {
   },
   data() {
     return {
-      showAddEventDialog: false,
-      showEditEventsDialog: false,
+      showAddEventModal: false,
+      showEditTimelineDialog: false,
       selectedEvent: {},
       events: [{
         title: 'Test Event',
@@ -210,52 +166,20 @@ export default {
         rating: 9,
         description: 'This is a test description.',
       }],
-      eventForm: {
-        title: '',
-        date: '',
-        rating: null,
-        description: '',
-      },
-      rules: {
-        title: [
-          { required: true, message: 'Please input an event title.', trigger: 'blur' },
-          { max: 50, message: 'Character limit is 50', trigger: 'blur' },
-        ],
-        date: [
-          { required: true, message: 'Please pick a date', trigger: 'change' },
-        ],
-        rating: [
-          { required: true, message: 'Please choose a rating', trigger: 'change' },
-        ],
-      },
     };
   },
   methods: {
+    openAddEventModal() {
+      this.showAddEventModal = true;
+    },
+    closeAddEventModal() {
+      this.showAddEventModal = false;
+    },
+    addEvent(newEvent) {
+      this.events.push(newEvent);
+    },
     setSelectedEvent(eventIndex) {
       this.selectedEvent = this.orderedEvents[eventIndex];
-    },
-    openAddEventDialog() {
-      this.showAddEventDialog = true;
-    },
-    closeAddEventDialog() {
-      this.showAddEventDialog = false;
-      this.resetForm();
-    },
-    submitForm() {
-      // eslint-disable-next-line consistent-return
-      this.$refs.eventForm.validate((valid) => {
-        if (valid) {
-          const newEvent = Object.assign({}, this.eventForm);
-          this.events.push(newEvent);
-          this.closeAddEventDialog();
-        } else {
-          console.log('Error on submit!');
-          return false;
-        }
-      });
-    },
-    resetForm() {
-      this.$refs.eventForm.resetFields();
     },
     compareEvents(a, b) {
       const dateA = new Date(a.date);
@@ -269,8 +193,8 @@ export default {
       }
       return comparison;
     },
-    openEditEventsDialog() {
-      this.showEditEventsDialog = true;
+    openEditTimelineDialog() {
+      this.showEditTimelineDialog = true;
     },
     editEvent(index) {
       console.log(index);
@@ -294,15 +218,6 @@ export default {
     float: right;
     .event-action-btn {
       display: inline-flex;
-    }
-  }
-
-  .add-event-dialog {
-    .el-form {
-      /deep/ .el-form-item__label {
-        font-weight: bold;
-        padding: 0;
-      }
     }
   }
 

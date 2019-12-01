@@ -70,6 +70,7 @@
       :close-on-click-modal="false"
       :close-on-press-escape="false"
       :visible.sync="showEditTimelineModal">
+      <div v-if="orderedEvents.length < 1" style="text-align: center">No Event Data</div>
       <el-timeline>
         <el-timeline-item
           v-for="(event, index) in orderedEvents"

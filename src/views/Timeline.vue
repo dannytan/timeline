@@ -2,7 +2,9 @@
   <div id="chart">
     <el-row type="flex" align="middle">
       <el-col :span="12" :xs="16">
-        <div class="chart-title" :class="$mq">Spiritual Timeline</div>
+        <div class="chart-title" :class="$mq">
+          <span v-if="!isXs">Timeline - </span>Spiritual
+        </div>
       </el-col>
       <el-col :span="12" :xs="8">
         <div class="event-action-btn-container">

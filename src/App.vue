@@ -1,19 +1,31 @@
 <template>
-  <div id="app">
-    <Header></Header>
-    <div id="main">
-      <router-view></router-view>
+  <div>
+    <div id="landing" v-if="showLanding">
+      <Landing></Landing>
+    </div>
+    <div id="app" v-else>
+      <Header></Header>
+      <div id="main">
+        <router-view></router-view>
+      </div>
     </div>
   </div>
 </template>
 
 <script>
 import Header from './components/Header.vue';
+import Landing from './views/Landing.vue';
 
 export default {
   name: 'app',
   components: {
     Header,
+    Landing,
+  },
+  data() {
+    return {
+      showLanding: true,
+    };
   },
 };
 </script>

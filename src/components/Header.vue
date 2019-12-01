@@ -83,7 +83,7 @@ export default {
     }
 
     .header-logo {
-      width: 250px;
+      width: 240px;
 
       &.xs {
         width: 150px;

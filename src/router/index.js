@@ -1,6 +1,6 @@
 import Vue from 'vue';
 import VueRouter from 'vue-router';
-import Home from '../views/Home.vue';
+import Landing from '../views/Landing.vue';
 import Timeline from '../views/Timeline.vue';
 
 Vue.use(VueRouter);
@@ -8,13 +8,25 @@ Vue.use(VueRouter);
 const routes = [
   {
     path: '/',
-    name: 'home',
-    component: Home,
+    name: 'landing',
+    component: Landing,
+    beforeEnter: (to, from, next) => {
+      if (localStorage.getItem('user')) {
+        return next('/timeline');
+      }
+      return next();
+    },
   },
   {
     path: '/timeline',
     name: 'timeline',
     component: Timeline,
+    beforeEnter: (to, from, next) => {
+      if (!localStorage.getItem('user')) {
+        return next('/');
+      }
+      return next();
+    },
   },
 ];
 

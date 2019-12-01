@@ -84,7 +84,7 @@ export default {
         font-size: 30px;
       }
       &.xs {
-        font-size: 22px;
+        font-size: 24px;
         padding-top: 10vh;
       }
     }

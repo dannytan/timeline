@@ -58,7 +58,7 @@ export default {
     },
     startOver() {
       localStorage.clear();
-      this.$router.push('/');
+      this.$emit('startOver');
     },
   },
   created() {

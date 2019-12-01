@@ -1,10 +1,10 @@
 <template>
   <div>
     <div id="landing" v-if="showLanding">
-      <Landing @goToApp="showLanding = false"></Landing>
+      <router-view @goToApp="goToApp"></router-view>
     </div>
     <div id="app" v-else>
-      <Header></Header>
+      <Header @startOver="startOver"></Header>
       <div id="main">
         <router-view></router-view>
       </div>
@@ -14,24 +14,30 @@
 
 <script>
 import Header from './components/Header.vue';
-import Landing from './views/Landing.vue';
 
 export default {
   name: 'app',
   components: {
     Header,
-    Landing,
   },
   data() {
     return {
       showLanding: true,
     };
   },
+  methods: {
+    goToApp() {
+      this.showLanding = false;
+      this.$router.push('/timeline');
+    },
+    startOver() {
+      this.showLanding = true;
+      this.$router.push('/');
+    },
+  },
   created() {
     if (localStorage.getItem('user')) {
       this.showLanding = false;
-    } else {
-      this.$router.push('/timeline');
     }
   },
 };

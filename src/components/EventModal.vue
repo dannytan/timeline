@@ -70,6 +70,17 @@ export default {
       type: Boolean,
       default: false,
     },
+    eventData: {
+      type: Object,
+      default() {
+        return {
+          title: '',
+          date: '',
+          rating: null,
+          description: '',
+        };
+      },
+    },
   },
   computed: {
     title() {
@@ -81,12 +92,7 @@ export default {
   },
   data() {
     return {
-      eventForm: {
-        title: '',
-        date: '',
-        rating: null,
-        description: '',
-      },
+      eventForm: {},
       rules: {
         title: [
           { required: true, message: 'Please input an event title.', trigger: 'blur' },
@@ -106,8 +112,8 @@ export default {
       // eslint-disable-next-line consistent-return
       this.$refs.eventForm.validate((valid) => {
         if (valid) {
-          const newEvent = Object.assign({}, this.eventForm);
-          this.$emit('submitted', newEvent);
+          const event = Object.assign({}, this.eventForm);
+          this.$emit('submitted', event);
           this.closeEventModal();
         } else {
           console.log('Error on submit!');
@@ -121,6 +127,11 @@ export default {
     closeEventModal() {
       this.$emit('closed');
       this.resetForm();
+    },
+  },
+  watch: {
+    eventData(val) {
+      this.eventForm = JSON.parse(JSON.stringify(val));
     },
   },
 };

@@ -18,13 +18,13 @@
             icon="el-icon-edit"
             class="event-action-btn"
             size="medium"
-            @click="openEditTimelineDialog">Edit Events</el-button>
+            @click="openEditTimelineModal">Edit Events</el-button>
         </div>
       </el-col>
     </el-row>
-    <apexchart height=500 :options="chartOptions" :series="series" />
+    <apexchart ref="apexchart" height=500 :options="chartOptions" :series="chartSeries" />
     <el-row>
-      <el-col :span="8" :offset="8" style="text-align: center">
+      <el-col :span="12" :offset="6" style="text-align: center">
         <h2 style="color: #ba334f">{{selectedEvent.title}}</h2>
         <h4>{{selectedEvent.date}}</h4>
         <el-tag v-show="selectedEvent.rating">Rating: {{selectedEvent.rating}}</el-tag>
@@ -38,7 +38,10 @@
     <el-dialog
       class="edit-events-dialog"
       title="Edit Timeline Events"
-      :visible.sync="showEditTimelineDialog">
+      :show-close="false"
+      :close-on-click-modal="false"
+      :close-on-press-escape="false"
+      :visible.sync="showEditTimelineModal">
       <el-timeline>
         <el-timeline-item
           v-for="(event, index) in orderedEvents"
@@ -71,10 +74,16 @@
       </el-timeline>
       <span slot="footer">
        <el-button type="primary"
-                  @click="showEditTimelineDialog = false">Done</el-button>
-          <el-button @click="showEditTimelineDialog = false">Cancel</el-button>
+                  @click="closeEditTimelineModal">Done</el-button>
+          <el-button @click="closeEditTimelineModal">Cancel</el-button>
       </span>
     </el-dialog>
+    <EventModal
+      :show-modal="showEditEventModal"
+      is-edit-modal
+      :event-data="editEventData"
+      @submitted="completeEditEvent"
+      @closed="closeEditEventModal"></EventModal>
   </div>
 </template>
 
@@ -90,27 +99,33 @@ export default {
   },
   computed: {
     orderedEvents() {
-      const orderedEvents = this.events;
-      return orderedEvents.sort(this.compareEvents);
+      if (this.events && this.events.length > 0) {
+        const orderedEvents = this.events;
+        return orderedEvents.sort(this.compareEvents);
+      }
+      return [];
     },
-    series() {
-      const ratings = [];
-      this.orderedEvents.forEach((event) => {
-        ratings.push(event.rating);
-      });
-
-      return [{
-        name: 'Rating',
-        data: ratings,
-      }];
-    },
-    chartOptions() {
+  },
+  data() {
+    return {
+      showAddEventModal: false,
+      showEditEventModal: false,
+      showEditTimelineModal: false,
+      editEventData: {},
+      editIndex: null,
+      selectedEvent: {},
+      events: [],
+      chartSeries: [],
+      chartOptions: {},
+    };
+  },
+  methods: {
+    updateChart() {
       const dates = [];
       this.orderedEvents.forEach((event) => {
         dates.push(event.date);
       });
-
-      return {
+      this.chartOptions = {
         chart: {
           type: 'line',
           zoom: {
@@ -153,22 +168,16 @@ export default {
           max: 10,
         },
       };
+
+      const ratings = [];
+      this.orderedEvents.forEach((event) => {
+        ratings.push(event.rating);
+      });
+      this.chartSeries = [{
+        name: 'Rating',
+        data: ratings,
+      }];
     },
-  },
-  data() {
-    return {
-      showAddEventModal: false,
-      showEditTimelineDialog: false,
-      selectedEvent: {},
-      events: [{
-        title: 'Test Event',
-        date: '11-20-2017',
-        rating: 9,
-        description: 'This is a test description.',
-      }],
-    };
-  },
-  methods: {
     openAddEventModal() {
       this.showAddEventModal = true;
     },
@@ -177,6 +186,8 @@ export default {
     },
     addEvent(newEvent) {
       this.events.push(newEvent);
+      localStorage.setItem('events', JSON.stringify(this.orderedEvents));
+      this.updateChart();
     },
     setSelectedEvent(eventIndex) {
       this.selectedEvent = this.orderedEvents[eventIndex];
@@ -193,15 +204,41 @@ export default {
       }
       return comparison;
     },
-    openEditTimelineDialog() {
-      this.showEditTimelineDialog = true;
+    openEditTimelineModal() {
+      this.showEditTimelineModal = true;
+    },
+    closeEditTimelineModal() {
+      this.showEditTimelineModal = false;
+    },
+    openEditEventModal() {
+      this.closeEditTimelineModal();
+      this.showEditEventModal = true;
+    },
+    closeEditEventModal() {
+      this.showEditEventModal = false;
+    },
+    completeEditEvent(event) {
+      const updatedEvent = JSON.parse(JSON.stringify(event));
+      this.events[this.editIndex] = updatedEvent;
+      localStorage.setItem('events', JSON.stringify(this.orderedEvents));
+      this.selectedEvent = updatedEvent;
+      this.updateChart();
     },
     editEvent(index) {
-      console.log(index);
+      this.editEventData = JSON.parse(JSON.stringify(this.orderedEvents[index]));
+      this.editIndex = index;
+      this.openEditEventModal();
     },
     deleteEvent(index) {
       this.events.splice(index, 1);
+      this.updateChart();
     },
+  },
+  created() {
+    if (localStorage.getItem('events')) {
+      this.events = JSON.parse(localStorage.getItem('events'));
+    }
+    this.updateChart();
   },
 };
 </script>

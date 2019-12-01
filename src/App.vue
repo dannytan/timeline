@@ -1,7 +1,7 @@
 <template>
   <div>
     <div id="landing" v-if="showLanding">
-      <Landing></Landing>
+      <Landing @goToApp="showLanding = false"></Landing>
     </div>
     <div id="app" v-else>
       <Header></Header>
@@ -26,6 +26,13 @@ export default {
     return {
       showLanding: true,
     };
+  },
+  created() {
+    if (localStorage.getItem('user')) {
+      this.showLanding = false;
+    } else {
+      this.$router.push('/timeline');
+    }
   },
 };
 </script>

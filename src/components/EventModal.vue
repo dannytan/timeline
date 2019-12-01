@@ -3,7 +3,8 @@
     class="event-modal"
     :title="title"
     :visible.sync="showModal"
-    width="40%"
+    width="50%"
+    :fullscreen="$mq === 'xs'"
     :show-close="false"
     :close-on-click-modal="false"
     :close-on-press-escape="false">
@@ -16,10 +17,12 @@
         <el-input v-model="eventForm.title" clearable></el-input>
       </el-form-item>
       <el-row>
-        <el-col :span="12">
+        <el-col :lg="12" :md="14">
           <el-form-item label="Date" prop="date" required>
             <el-date-picker
               v-model="eventForm.date"
+              class="event-date"
+              :class="$mq"
               type="date"
               placeholder="MM/DD/YYY"
               format="MM/dd/yyyy"
@@ -27,10 +30,12 @@
             </el-date-picker>
           </el-form-item>
         </el-col>
-        <el-col :span="12">
-          <el-form-item label="Rating" prop="rating">
+        <el-col :lg="12" :md="10">
+          <el-form-item label="Rating (1-10)" prop="rating">
             <el-input-number
               v-model="eventForm.rating"
+              class="event-rating"
+              :class="$mq"
               controls-position="right"
               :min="1"
               :max="10">
@@ -143,6 +148,16 @@ export default {
       /deep/ .el-form-item__label {
         font-weight: bold;
         padding: 0;
+      }
+    }
+    .event-date {
+      &.xs, &.sm {
+        width: 100%;
+      }
+    }
+    .event-rating {
+      &.xs, &.sm {
+        width: 100%;
       }
     }
   }

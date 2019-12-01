@@ -55,7 +55,7 @@ export default {
   methods: {
     start() {
       localStorage.setItem('user', this.name);
-      this.$router.push('/timeline');
+      this.$emit('goToApp');
     },
   },
 };

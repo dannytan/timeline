@@ -1,34 +1,56 @@
 <template>
   <div id="chart">
     <el-row type="flex" align="middle">
-      <el-col :span="12">
-        <div class="chart-title">Spiritual Timeline</div>
+      <el-col :span="12" :xs="16">
+        <div class="chart-title" :class="$mq">Spiritual Timeline</div>
       </el-col>
-      <el-col :span="12">
+      <el-col :span="12" :xs="8">
         <div class="event-action-btn-container">
           <el-button
+            v-if="!isXs"
             type="primary"
             icon="el-icon-plus"
             class="event-action-btn"
             size="medium"
             @click="openAddEventModal">Add Event</el-button>
           <el-button
+            v-if="!isXs"
             type="primary"
             plain
             icon="el-icon-edit"
             class="event-action-btn"
             size="medium"
             @click="openEditTimelineModal">Edit Events</el-button>
+          <el-button-group v-if="isXs">
+            <el-button
+              type="primary"
+              icon="el-icon-plus"
+              size="small"
+              @click="openAddEventModal"
+            ></el-button>
+            <el-button
+              type="primary"
+              plain
+              icon="el-icon-edit"
+              size="small"
+              @click="openEditTimelineModal">
+            </el-button>
+          </el-button-group>
         </div>
       </el-col>
     </el-row>
     <apexchart ref="apexchart" height=500 :options="chartOptions" :series="chartSeries" />
     <el-row>
-      <el-col :span="12" :offset="6" style="text-align: center">
-        <h2 style="color: #ba334f">{{selectedEvent.title}}</h2>
-        <h4>{{selectedEvent.date}}</h4>
-        <el-tag v-show="selectedEvent.rating">Rating: {{selectedEvent.rating}}</el-tag>
-        <p>{{selectedEvent.description}}</p>
+      <el-col :span="12" :offset="6" :xs="{ span: 22, offset: 1 }"
+              class="event-details" :class="$mq">
+        <h2 class="event-title">{{selectedEvent.title}}</h2>
+        <h4 class="event-date">{{selectedEvent.date}}</h4>
+        <el-tag
+          v-show="selectedEvent.rating"
+          size="medium">
+          Rating: {{selectedEvent.rating}}
+        </el-tag>
+        <p class="event-description">{{selectedEvent.description}}</p>
       </el-col>
     </el-row>
     <EventModal
@@ -38,6 +60,8 @@
     <el-dialog
       class="edit-events-dialog"
       title="Edit Timeline Events"
+      :width="isSm ? '65%' : '50%'"
+      :fullscreen="isXs"
       :show-close="false"
       :close-on-click-modal="false"
       :close-on-press-escape="false"
@@ -49,26 +73,38 @@
           type="primary"
           :timestamp="event.date"
           placement="top">
-          <el-card class="timeline-card">
-            <div>
-              <div class="timeline-card-title">{{event.title}}</div>
-              <el-tag class="timeline-card-rating" size="small">Rating: {{event.rating}}</el-tag>
-              <div class="timeline-card-actions">
-                <el-button
-                  type="text"
-                  icon="el-icon-edit-outline"
-                  class="timeline-card-action-btn"
-                  @click="editEvent(index)">
-                </el-button>
-                <el-button
-                  type="text"
-                  icon="el-icon-delete"
-                  class="timeline-card-action-btn"
-                  @click="deleteEvent(index)">
-                </el-button>
-              </div>
+          <el-card class="timeline-card" :class="$mq">
+            <div class="timeline-card-title">{{event.title}}</div>
+            <el-tag class="timeline-card-rating" size="mini">Rating: {{event.rating}}</el-tag>
+            <div class="timeline-card-actions" v-if="isLg || isXl">
+              <el-button
+                type="text"
+                icon="el-icon-edit-outline"
+                class="timeline-card-action-btn"
+                @click="editEvent(index)">
+              </el-button>
+              <el-button
+                type="text"
+                icon="el-icon-delete"
+                class="timeline-card-action-btn"
+                @click="deleteEvent(index)">
+              </el-button>
             </div>
-            <p>{{event.description}}</p>
+            <p class="timeline-card-description">{{event.description}}</p>
+            <div class="timeline-card-actions" v-if="!isLg && !isXl">
+              <el-button
+                type="text"
+                icon="el-icon-edit-outline"
+                class="timeline-card-action-btn"
+                @click="editEvent(index)">
+              </el-button>
+              <el-button
+                type="text"
+                icon="el-icon-delete"
+                class="timeline-card-action-btn"
+                @click="deleteEvent(index)">
+              </el-button>
+            </div>
           </el-card>
         </el-timeline-item>
       </el-timeline>
@@ -104,6 +140,21 @@ export default {
         return orderedEvents.sort(this.compareEvents);
       }
       return [];
+    },
+    isXs() {
+      return this.$mq === 'xs';
+    },
+    isSm() {
+      return this.$mq === 'sm';
+    },
+    isMd() {
+      return this.$mq === 'md';
+    },
+    isLg() {
+      return this.$mq === 'lg';
+    },
+    isXl() {
+      return this.$mq === 'xl';
     },
   },
   data() {
@@ -220,6 +271,8 @@ export default {
     completeEditEvent(event) {
       const updatedEvent = JSON.parse(JSON.stringify(event));
       this.events[this.editIndex] = updatedEvent;
+      // This is needed to update the computed property: orderedEvents
+      this.events = JSON.parse(JSON.stringify(this.events));
       localStorage.setItem('events', JSON.stringify(this.orderedEvents));
       this.selectedEvent = updatedEvent;
       this.updateChart();
@@ -249,6 +302,10 @@ export default {
     font-size: 26px;
     font-weight: bold;
     padding: 5px 25px;
+
+    &.xs {
+      font-size: 18px;
+    }
   }
 
   .event-action-btn-container {
@@ -258,7 +315,30 @@ export default {
     }
   }
 
+  .event-details {
+    text-align: center;
+
+    .event-title {
+      color: #ba334f;
+    }
+
+    &.xs {
+      .event-title {
+        font-size: 18px;
+      }
+      .event-date {
+        font-size: 14px;
+      }
+      .event-description {
+        font-size: 14px;
+      }
+    }
+  }
+
   .edit-events-dialog {
+    .el-timeline {
+      padding: 0;
+    }
     .timeline-card {
       /deep/ .el-card__body {
         padding: 20px 20px 10px 20px;
@@ -284,6 +364,27 @@ export default {
         padding-top: 2px;
         margin-left: 4px;
         font-size: 18px;
+      }
+
+      &.md, &.sm {
+        .timeline-card-title {
+          width: 100%;
+        }
+        .timeline-card-rating {
+          margin: 10px 0 0 0;
+        }
+      }
+      &.xs {
+        .timeline-card-title {
+          font-size: 15px;
+          width: 100%;
+        }
+        .timeline-card-rating {
+          margin: 10px 0 0 0;
+        }
+        .timeline-card-description {
+          font-size: 13px;
+        }
       }
     }
   }

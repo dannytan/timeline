@@ -39,7 +39,11 @@
         </div>
       </el-col>
     </el-row>
-    <apexchart ref="apexchart" height=500 :options="chartOptions" :series="chartSeries" />
+    <apexchart
+      ref="apexchart"
+      :height="chartHeight"
+      :options="chartOptions"
+      :series="chartSeries" />
     <el-row>
       <el-col :span="12" :offset="6" :xs="{ span: 22, offset: 1 }"
               class="event-details" :class="$mq">
@@ -140,6 +144,9 @@ export default {
         return orderedEvents.sort(this.compareEvents);
       }
       return [];
+    },
+    chartHeight() {
+      return this.$mq === 'xs' ? '400' : '500';
     },
     isXs() {
       return this.$mq === 'xs';

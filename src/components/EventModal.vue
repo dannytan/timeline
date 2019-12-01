@@ -54,10 +54,10 @@
     <span slot="footer">
       <el-button
         type="primary"
-        icon="el-icon-plus"
+        :icon="submitIcon"
         @click="submitForm()">{{submitLabel}}
       </el-button>
-      <el-button @click="resetForm()">Reset</el-button>
+      <el-button v-if="!isEditModal" @click="resetForm()">Reset</el-button>
       <el-button @click="closeEventModal">Cancel</el-button>
     </span>
   </el-dialog>
@@ -93,6 +93,9 @@ export default {
     },
     submitLabel() {
       return this.isEditModal ? 'Done' : 'Add';
+    },
+    submitIcon() {
+      return this.isEditModal ? 'el-icon-check' : 'el-icon-plus';
     },
   },
   data() {

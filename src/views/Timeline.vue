@@ -3,7 +3,20 @@
     <el-row type="flex" align="middle">
       <el-col :span="12" :xs="16">
         <div class="chart-title" :class="$mq">
-          <span v-if="!isXs">Timeline - </span>Spiritual
+          <span v-if="!isXs">Timeline - </span>{{timelineTitle}}
+          <el-dropdown @command="handleCommand">
+            <div>
+              <el-button
+                class="timeline-dropdown"
+                type="text"
+                icon="el-icon-caret-bottom">
+              </el-button>
+            </div>
+            <el-dropdown-menu slot="dropdown">
+              <el-dropdown-item command="spiritual">Spiritual</el-dropdown-item>
+              <el-dropdown-item command="personal">Personal</el-dropdown-item>
+            </el-dropdown-menu>
+          </el-dropdown>
         </div>
       </el-col>
       <el-col :span="12" :xs="8">
@@ -141,6 +154,24 @@ export default {
     EventModal,
   },
   computed: {
+    timelineTitle() {
+      if (this.timelineType === 'spiritual') {
+        return 'Spiritual';
+      }
+      if (this.timelineType === 'personal') {
+        return 'Personal';
+      }
+      return '';
+    },
+    localStorageEvents() {
+      if (this.timelineType === 'spiritual') {
+        return 'events-spiritual';
+      }
+      if (this.timelineType === 'personal') {
+        return 'events-personal';
+      }
+      return '';
+    },
     orderedEvents() {
       if (this.events && this.events.length > 0) {
         const orderedEvents = this.events;
@@ -169,6 +200,7 @@ export default {
   },
   data() {
     return {
+      timelineType: 'spiritual',
       showAddEventModal: false,
       showEditEventModal: false,
       showEditTimelineModal: false,
@@ -247,7 +279,7 @@ export default {
     },
     addEvent(newEvent) {
       this.events.push(newEvent);
-      localStorage.setItem('events', JSON.stringify(this.orderedEvents));
+      localStorage.setItem(this.localStorageEvents, JSON.stringify(this.orderedEvents));
       this.updateChart();
     },
     setSelectedEvent(eventIndex) {
@@ -283,7 +315,7 @@ export default {
       this.events[this.editIndex] = updatedEvent;
       // This is needed to update the computed property: orderedEvents
       this.events = JSON.parse(JSON.stringify(this.events));
-      localStorage.setItem('events', JSON.stringify(this.orderedEvents));
+      localStorage.setItem(this.localStorageEvents, JSON.stringify(this.orderedEvents));
       this.selectedEvent = updatedEvent;
       this.updateChart();
     },
@@ -296,11 +328,19 @@ export default {
       this.events.splice(index, 1);
       this.updateChart();
     },
+    handleCommand(command) {
+      this.timelineType = command;
+      this.setLocalStorageEvents();
+      this.updateChart();
+      this.selectedEvent = {};
+    },
+    setLocalStorageEvents() {
+      const events = localStorage.getItem(this.localStorageEvents);
+      this.events = events ? JSON.parse(events) : [];
+    },
   },
   created() {
-    if (localStorage.getItem('events')) {
-      this.events = JSON.parse(localStorage.getItem('events'));
-    }
+    this.setLocalStorageEvents();
     this.updateChart();
   },
 };
@@ -312,6 +352,10 @@ export default {
     font-size: 26px;
     font-weight: bold;
     padding: 5px 25px;
+
+    .timeline-dropdown {
+      font-size: 24px;
+    }
 
     &.xs {
       font-size: 18px;

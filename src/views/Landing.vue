@@ -19,7 +19,12 @@
       </el-col>
     </el-row>
     <div class="start" :class="$mq">
-      <el-input v-if="showNameInput" placeholder="Please enter your name" v-model="name"></el-input>
+      <el-input
+        v-if="showNameInput"
+        placeholder="Please enter your name"
+        v-model="name"
+        @keyup.enter.native="start">
+      </el-input>
       <el-button
         v-if="showNameInput"
         class="lets-go-btn"

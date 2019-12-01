@@ -329,18 +329,24 @@ export default {
       this.updateChart();
     },
     handleCommand(command) {
-      this.timelineType = command;
-      this.setLocalStorageEvents();
+      localStorage.setItem('timeline-type', command);
+      this.setTimelineTypeFromLocalStorage();
+      this.setEventsFromLocalStorage();
       this.updateChart();
       this.selectedEvent = {};
     },
-    setLocalStorageEvents() {
+    setEventsFromLocalStorage() {
       const events = localStorage.getItem(this.localStorageEvents);
       this.events = events ? JSON.parse(events) : [];
     },
+    setTimelineTypeFromLocalStorage() {
+      const type = localStorage.getItem('timeline-type');
+      this.timelineType = type || 'personal';
+    },
   },
   created() {
-    this.setLocalStorageEvents();
+    this.setTimelineTypeFromLocalStorage();
+    this.setEventsFromLocalStorage();
     this.updateChart();
   },
 };

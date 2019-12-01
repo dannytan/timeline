@@ -1,13 +1,13 @@
 <template>
   <div id="landing">
     <el-row>
-      <el-col :span="24" class="greeting">
-        <div>NOT ALL THOSE WHO WANDER ARE <span class="highlight">LOST</span>.</div>
-        <div>THIS IS YOUR <span class="highlight">STORY</span>.</div>
+      <el-col :span="24" class="greeting" :class="$mq">
+        <div>NOT ALL WHO WANDER ARE <span class="highlight">LOST</span>.<br v-if="$mq !== 'xs'"/>
+          THIS IS YOUR <span class="highlight">STORY</span>.</div>
       </el-col>
     </el-row>
     <el-row>
-      <el-col :span="14" class="about">
+      <el-col :span="14" :xs="24" class="about" :class="$mq">
         <p>
           Use this as a tool to create interactive and visual timelines of your life. By looking
           back at past events, experiences, and seasons, you will begin to identify the
@@ -18,10 +18,11 @@
         </p>
       </el-col>
     </el-row>
-    <div class="start">
+    <div class="start" :class="$mq">
       <el-input v-if="showNameInput" placeholder="Please enter your name" v-model="name"></el-input>
       <el-button
         v-if="showNameInput"
+        class="lets-go-btn"
         type="primary"
         :disabled="disableStart"
         @click="start">
@@ -75,16 +76,50 @@ export default {
       .highlight {
         color: #AA2F48;
       }
+
+      &.md {
+        font-size: 40px;
+      }
+      &.sm {
+        font-size: 30px;
+      }
+      &.xs {
+        font-size: 22px;
+        padding-top: 10vh;
+      }
     }
     .about {
       padding: 10px 0 0 10vw;
       font-size: 20px;
+
+      &.md {
+        font-size: 18px;
+      }
+      &.sm {
+        font-size: 16px;
+      }
+      &.xs {
+        font-size: 14px;
+        padding: 10px 10vw 0 10vw;
+      }
     }
     .start {
       padding: 10px 0 0 10vw;
       .el-input {
         width: 350px;
         margin-right: 20px;
+      }
+
+      &.xs {
+        .el-input {
+          width: 220px;
+          margin-right: 20px;
+        }
+        .lets-go-btn {
+          display: block;
+          width: 220px;
+          margin-top: 10px;
+        }
       }
     }
   }

@@ -15,7 +15,7 @@
             <el-dropdown-item class="header-profile-details">
               <div class="profile-name">{{userName}}</div>
             </el-dropdown-item>
-            <el-dropdown-item divided command="how-it-works">How it Works</el-dropdown-item>
+<!--            <el-dropdown-item divided command="how-it-works">How it Works</el-dropdown-item>-->
 <!--            <el-dropdown-item>Share timeline</el-dropdown-item>-->
             <el-dropdown-item command="start-over">Start Over</el-dropdown-item>
           </el-dropdown-menu>

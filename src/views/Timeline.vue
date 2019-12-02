@@ -13,8 +13,9 @@
               </el-button>
             </div>
             <el-dropdown-menu slot="dropdown">
-              <el-dropdown-item command="spiritual">Spiritual</el-dropdown-item>
-              <el-dropdown-item command="personal">Personal</el-dropdown-item>
+              <el-dropdown-item command="spiritual" v-if="!isSpiritual">Spiritual</el-dropdown-item>
+              <el-dropdown-item command="personal" v-if="!isPersonal">Personal</el-dropdown-item>
+              <el-dropdown-item command="combined">Combined</el-dropdown-item>
             </el-dropdown-menu>
           </el-dropdown>
         </div>
@@ -154,20 +155,26 @@ export default {
     EventModal,
   },
   computed: {
+    isSpiritual() {
+      return this.timelineType === 'spiritual';
+    },
+    isPersonal() {
+      return this.timelineType === 'personal';
+    },
     timelineTitle() {
-      if (this.timelineType === 'spiritual') {
+      if (this.isSpiritual) {
         return 'Spiritual';
       }
-      if (this.timelineType === 'personal') {
+      if (this.isPersonal) {
         return 'Personal';
       }
       return '';
     },
     localStorageEvents() {
-      if (this.timelineType === 'spiritual') {
+      if (this.isSpiritual) {
         return 'events-spiritual';
       }
-      if (this.timelineType === 'personal') {
+      if (this.isPersonal) {
         return 'events-personal';
       }
       return '';
@@ -330,10 +337,14 @@ export default {
     },
     handleCommand(command) {
       localStorage.setItem('timeline-type', command);
-      this.setTimelineTypeFromLocalStorage();
-      this.setEventsFromLocalStorage();
-      this.updateChart();
-      this.selectedEvent = {};
+      if (command === 'combined') {
+        this.$router.push('/timeline/combined');
+      } else {
+        this.setTimelineTypeFromLocalStorage();
+        this.setEventsFromLocalStorage();
+        this.updateChart();
+        this.selectedEvent = {};
+      }
     },
     setEventsFromLocalStorage() {
       const events = localStorage.getItem(this.localStorageEvents);

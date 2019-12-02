@@ -41,9 +41,7 @@ export default {
   },
   methods: {
     handleCommand(command) {
-      if (command === 'how-it-works') {
-        console.log('Go to How it Works page...');
-      } else if (command === 'start-over') {
+      if (command === 'start-over') {
         this.confirmStartOver();
       }
     },

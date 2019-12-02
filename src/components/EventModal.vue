@@ -124,7 +124,6 @@ export default {
           this.$emit('submitted', event);
           this.closeEventModal();
         } else {
-          console.log('Error on submit!');
           return false;
         }
       });
